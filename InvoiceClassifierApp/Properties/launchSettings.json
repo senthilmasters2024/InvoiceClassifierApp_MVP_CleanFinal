@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "InvoiceClassifierApp": {
+      "commandName": "Project"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker"
+    }
+  }
+}
