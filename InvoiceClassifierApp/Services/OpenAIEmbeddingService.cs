@@ -1,9 +1,11 @@
 ﻿
 using System.Net.Http.Headers;
+using System.Reflection.Emit;
 using System.Text;
 using System.Text.Json;
 using Microsoft.VisualBasic;
 using OpenAI.Embeddings;
+using SQLitePCL;
 
 namespace InvoiceClassifierApp.Services;
 
@@ -82,7 +84,7 @@ public class OpenAIEmbeddingService
     {
         string safeName = identifier.Replace(" ", "_").Replace("/", "_");
         string path = Path.Combine("embeddings", safeName + ".json");
-
+        Batteries.Init();
         if (File.Exists(path))
         {
             var json = await File.ReadAllTextAsync(path);
@@ -99,6 +101,12 @@ public class OpenAIEmbeddingService
             Filename = identifier,
             Vector = embedding
         };
+
+        var db = new EmbeddingStorageService("embeddings.db");
+
+
+        db.SaveEmbedding(exportObject);
+        Console.WriteLine("Embedding saved successfully!");
 
         string jsonOutput = JsonSerializer.Serialize(exportObject, new JsonSerializerOptions { WriteIndented = true });
         await File.WriteAllTextAsync(path, jsonOutput);
@@ -131,16 +139,18 @@ public class OpenAIEmbeddingService
             }
 
             // Create the object to save
-            var exportObject = new
+            var exportObjectexportObject = new
             {
                 doc.Identifier,
                 doc.Label,
                 Embedding = embedding
             };
 
+           
+
             // Write to individual file in output directory
             string outputPath = Path.Combine(outputDirectory, safeName + ".json");
-            string jsonOutput = JsonSerializer.Serialize(exportObject, new JsonSerializerOptions { WriteIndented = true });
+            string jsonOutput = JsonSerializer.Serialize(exportObjectexportObject, new JsonSerializerOptions { WriteIndented = true });
             await File.WriteAllTextAsync(outputPath, jsonOutput);
         }
 
